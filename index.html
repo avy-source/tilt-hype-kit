@@ -756,7 +756,7 @@ async function exportSize(size, filename){
     const a = document.createElement('a'); a.href = dataUrl; a.download = filename; a.click();
   } finally { holder.remove(); }
 }
-function fileName(size){ const h = (state.handle || 'tilt').replace(/[^a-z0-9_]/gi,''); return `tilt-${state.template}-${h}-${size.w}x${size.h}.png`; }
+function fileName(size){ const h = (state.handle || 'tilt').replace(/[^a-z0-9_]/gi,''); return `tilt-${state.template}-${h}-${size.platform}-${size.w}x${size.h}.png`; }
 function zipName(){ const h = (state.handle || 'tilt').replace(/[^a-z0-9_]/gi,''); return `tilt-${state.template}-${h}-all-sizes.zip`; }
 $('dl-current').onclick = async () => {
   const btn = $('dl-current'); btn.disabled = true; const old = btn.innerHTML; btn.textContent = 'Rendering…';
