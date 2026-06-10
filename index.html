@@ -696,7 +696,8 @@ function posterHTML(size){
     if (portrait || tall || ((squareFmt || landscape) && longLang)){
       // portrait / story: offer copy MAX 2 lines, sized to sit beside the badges, bottom-aligned
       const lines = enjoyStr.split('\n');
-      const maxLineChars = Math.max.apply(null, lines.map(l => l.length).concat([1]));
+      let maxLineChars = Math.max.apply(null, lines.map(l => l.length).concat([1]));
+      if (longLang) maxLineChars = Math.max(maxLineChars, 29);   // PL/ES/IT all size to the longest (same size)
       const enjoySize = Math.min(subSize * 1.45, enjoyAvail / (maxLineChars * 0.56 * u));
       bottomRow = `<div class="bottom" style="align-items:flex-end;">
         <div class="enjoy" style="font-size:${enjoySize*u}px;line-height:1.12;color:${txt};font-weight:650;white-space:nowrap;">${nl2br(enjoyStr)}</div>
