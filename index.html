@@ -338,6 +338,34 @@
   </div>
 </div>
 
+<style>
+  .fb-btn { position: fixed; right: 22px; bottom: 22px; z-index: 90; background: var(--accent); color: #fff; border: none; border-radius: 999px; padding: 12px 20px; font-family: var(--font); font-weight: 650; font-size: 15px; cursor: pointer; box-shadow: 0 10px 28px rgba(0,0,0,.45); display: inline-flex; align-items: center; gap: 8px; }
+  .fb-btn:hover { filter: brightness(1.08); }
+  .fb-modal { position: fixed; inset: 0; z-index: 95; background: rgba(8,8,10,.72); display: none; align-items: center; justify-content: center; padding: 24px; }
+  .fb-card { width: 100%; max-width: 440px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: 0 30px 70px rgba(0,0,0,.6); }
+  .fb-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .fb-head strong { font-size: 17px; }
+  .fb-x { background: none; border: none; color: var(--muted); font-size: 24px; line-height: 1; cursor: pointer; }
+  .fb-card input, .fb-card textarea { width: 100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--tilt-seasalt); border-radius: 10px; padding: 11px 12px; font-family: var(--font); font-size: 15px; outline: none; margin-bottom: 10px; }
+  .fb-card textarea { min-height: 120px; resize: vertical; }
+  .fb-card input:focus, .fb-card textarea:focus { border-color: #6a6a74; }
+  .fb-status { font-size: 13px; color: var(--muted); margin: 8px 0 0; min-height: 16px; }
+</style>
+
+<button class="fb-btn" id="fb-btn">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  Feedback
+</button>
+<div class="fb-modal" id="fb-modal">
+  <div class="fb-card">
+    <div class="fb-head"><strong>Send feedback</strong><button class="fb-x" id="fb-close" aria-label="Close">&times;</button></div>
+    <input type="text" id="fb-name" placeholder="Your name" />
+    <textarea id="fb-msg" placeholder="Your feedback"></textarea>
+    <button class="btn primary" id="fb-send" style="width:100%;justify-content:center;">Send feedback</button>
+    <p class="fb-status" id="fb-status"></p>
+  </div>
+</div>
+
 <script>
 /* ===================== ASSETS ===================== */
 const LIVE_ICON = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMjcuNDcgODUuOTIiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICNmZmY7CiAgICAgIH0KCiAgICAgIC5jbHMtMiB7CiAgICAgICAgZmlsbDogI2ZmM2I1MTsKICAgICAgfQoKICAgICAgLmNscy0zIHsKICAgICAgICBmaWxsOiAjZjZmN2Y4OwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8ZyBpZD0iTGF5ZXJfMS0yIiBkYXRhLW5hbWU9IkxheWVyIDEiPgogICAgPHJlY3QgY2xhc3M9ImNscy0yIiB4PSIwIiB5PSIwIiB3aWR0aD0iMjI3LjQ3IiBoZWlnaHQ9Ijg1LjkyIiByeD0iNDIuOTYiIHJ5PSI0Mi45NiIvPgogICAgPGc+CiAgICAgIDxnPgogICAgICAgIDxwYXRoIGNsYXNzPSJjbHMtMyIgZD0iTTEwNi40LDI0LjY2aDcuM3YyOS40NWgxNy4wNXY2LjU1aC0yNC4zNVYyNC42NloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0xMzQuMTUsMjQuNjZoNi44djYuMDVoLTYuOHYtNi4wNVpNMTM0LjE1LDM0LjY2aDYuOHYyNmgtNi44di0yNloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0xNDMuNzUsMzQuNjZoNy4zNWw2LjQ1LDE5Ljg1LDYuMjUtMTkuODVoNy4zbC05Ljc1LDI2aC03LjhsLTkuOC0yNloiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0xNzIuODUsNDcuNjZjMC03Ljc1LDQuOC0xMy42LDEzLjA1LTEzLjZzMTMsNS42LDEzLDE0LjJ2MS41aC0xOS4zNWMuNTUsMy44NSwyLjc1LDYuMjUsNi4zNSw2LjI1LDIuOTUsMCw0LjktMS4yLDUuOTUtMy4zNWg2LjZjLTEuNyw1LjE1LTYuMiw4LjYtMTIuNTUsOC42LTguMjUsMC0xMy4wNS01Ljg1LTEzLjA1LTEzLjZaTTE5Mi4xLDQ1LjA2Yy0uNjUtMy41NS0yLjgtNS43NS02LjItNS43NXMtNS42LDIuMi02LjI1LDUuNzVoMTIuNDVaIi8+CiAgICAgIDwvZz4KICAgICAgPGc+CiAgICAgICAgPGNpcmNsZSBjbGFzcz0iY2xzLTEiIGN4PSI1Ny4zMSIgY3k9IjQyLjgyIiByPSI3LjE2Ii8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNjcuNzgsMzAuMTJoMGMtMS4wMSwxLjAxLTEuMDIsMi42NC0uMDQsMy42NywyLjU3LDIuNzIsNC4xMSw2LjE4LDQuMTEsOS45NHMtMS41NCw3LjIyLTQuMTEsOS45NGMtLjk4LDEuMDQtLjk4LDIuNjYuMDQsMy42N2gwYzEuMDQsMS4wNCwyLjc0LDEuMDMsMy43Ni0uMDQsMy40OC0zLjY3LDUuNTktOC40MSw1LjU5LTEzLjU3cy0yLjEtOS45LTUuNTktMTMuNTdjLTEuMDEtMS4wNy0yLjcyLTEuMDgtMy43Ni0uMDRaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNDIuNzcsNDMuNzRjMC0zLjc2LDEuNTQtNy4yMiw0LjExLTkuOTQuOTgtMS4wNC45OC0yLjY2LS4wNC0zLjY3aDBjLTEuMDQtMS4wNC0yLjc0LTEuMDMtMy43Ni4wNC0zLjQ4LDMuNjctNS41OSw4LjQxLTUuNTksMTMuNTdzMi4xLDkuOSw1LjU5LDEzLjU3YzEuMDEsMS4wNywyLjcyLDEuMDgsMy43Ni4wNGgwYzEuMDEtMS4wMSwxLjAyLTIuNjQuMDQtMy42Ny0yLjU3LTIuNzItNC4xMS02LjE4LTQuMTEtOS45NFoiLz4KICAgICAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik03OC4wOSwyMC4zOWgwYy0xLjA4LDEuMDgtMS4wMywyLjg2LjE0LDMuODQsNS43Myw0Ljg1LDkuMjcsMTEuNDYsOS4yNywxOC43M3MtMy41NCwxMy44OC05LjI3LDE4LjczYy0xLjE2Ljk4LTEuMjIsMi43Ni0uMTQsMy44NGgwYy45Ni45NiwyLjUxLDEuMDMsMy41NS4xNSw2Ljg3LTUuODMsMTEuMTMtMTMuODYsMTEuMTMtMjIuNzJzLTQuMjUtMTYuODktMTEuMTMtMjIuNzJjLTEuMDQtLjg4LTIuNTktLjgxLTMuNTUuMTVaIi8+CiAgICAgICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjkuODQsNDIuOTZjMC03LjI3LDMuNTQtMTMuODgsOS4yNy0xOC43MywxLjE2LS45OCwxLjIyLTIuNzYuMTQtMy44NGgwYy0uOTYtLjk2LTIuNTEtMS4wMy0zLjU1LS4xNS02Ljg3LDUuODMtMTEuMTMsMTMuODYtMTEuMTMsMjIuNzJzNC4yNSwxNi44OSwxMS4xMywyMi43MmMxLjA0Ljg4LDIuNTkuODEsMy41NS0uMTVoMGMxLjA4LTEuMDgsMS4wMy0yLjg2LS4xNC0zLjg0LTUuNzMtNC44NS05LjI3LTExLjQ2LTkuMjctMTguNzNaIi8+CiAgICAgIDwvZz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPg==';
@@ -889,6 +917,31 @@ $('l-handle').addEventListener('keydown', (e) => { if (e.key === 'Enter') enterE
     }
   });
 })();
+
+/* ===================== FEEDBACK ===================== */
+// Paste your Formspree form endpoint here (Formspree.io -> create form -> copy the URL):
+const FEEDBACK_ENDPOINT = 'https://formspree.io/f/mkoazkze';
+$('fb-btn').onclick = () => { $('fb-modal').style.display = 'flex'; $('fb-status').textContent = ''; setTimeout(() => $('fb-msg').focus(), 60); };
+$('fb-close').onclick = () => { $('fb-modal').style.display = 'none'; };
+$('fb-modal').addEventListener('click', (e) => { if (e.target === $('fb-modal')) $('fb-modal').style.display = 'none'; });
+$('fb-send').onclick = async () => {
+  const name = $('fb-name').value.trim();
+  const msg = $('fb-msg').value.trim();
+  if (!name) { $('fb-status').textContent = 'Please add your name.'; return; }
+  if (!msg) { $('fb-status').textContent = 'Please add your feedback.'; return; }
+  if (FEEDBACK_ENDPOINT.includes('REPLACE_WITH_YOUR_ID')) { $('fb-status').textContent = 'Feedback isn\'t connected yet (set FEEDBACK_ENDPOINT in the code).'; return; }
+  const btn = $('fb-send'), old = btn.textContent; btn.disabled = true; btn.textContent = 'Sending...'; $('fb-status').textContent = '';
+  try {
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('message', msg);
+    fd.append('context', `template=${state.template}, size=${state.size}, lang=${state.lang}, view=${$('app').style.display === 'none' ? 'landing' : 'studio'}`);
+    const res = await fetch(FEEDBACK_ENDPOINT, { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd });
+    if (res.ok) { $('fb-status').textContent = 'Thanks! Your feedback was sent.'; $('fb-msg').value = ''; setTimeout(() => $('fb-modal').style.display = 'none', 1400); }
+    else { $('fb-status').textContent = 'Hmm, that did not send. Try again in a moment.'; }
+  } catch (e) { $('fb-status').textContent = 'Network error - please try again.'; }
+  finally { btn.disabled = false; btn.textContent = old; }
+};
 
 /* ===================== INIT ===================== */
 updateFieldVisibility();
